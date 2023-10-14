@@ -1,5 +1,5 @@
 import sys
-from alphabet import ALPHABET
+from alphabet import *
 
 
 class Color:
@@ -22,22 +22,23 @@ def show_file_err(filename):
     print(f'{Color.RED}Could not open file "{filename}"!{Color.END}')
 
 
-def show_char_warr(character, line_num, char_num):
-    print(f'{Color.YELLOW}Found unexpected character "{character}" (line #{line_num}, position #{char_num}){Color.END}')
-
-
 def show_help():
     print(f'''Usage:
     {Color.BOLD}-d <file>{Color.END}
         Takes message and private key from the file and performs decoding.
     {Color.BOLD}-e <file>{Color.END}
-        Takes message, k-values and keys (private and public) from the file and performs encoding.
+        Takes message, k-values and public key from the file and performs encoding.
     {Color.BOLD}-h, --help{Color.END}
         Displays this message.''')
 
 
 def custom_mod(numerator, denominator, modulus):
-    return (numerator * pow(denominator, -1, modulus)) % modulus
+    result = 0
+    try:
+        result = (numerator * pow(denominator, -1, modulus)) % modulus
+    except ValueError:
+        print(numerator, denominator, modulus)
+    return result
 
 
 def add(point1, point2):
@@ -64,7 +65,19 @@ def mul(point, k):
 
 
 def decode(filename):
-    print('decode')
+    try:
+        file = open(filename, 'r', encoding='utf8')
+        private_key = int(file.readline())
+        for c in file.readlines():
+            c = c.split(',')
+            c1 = [int(coord) for coord in c[0].split()]
+            c2 = [int(coord) for coord in c[1].split()]
+            tmp = mul(c1, private_key)
+            x, y = add(c2, (tmp[0], -tmp[1]))
+            print(c)
+            print(INV_ALPHABET[(x, y)], end='')
+    except FileNotFoundError:
+        show_file_err(filename)
 
 
 def encode(filename):
@@ -72,14 +85,13 @@ def encode(filename):
         file = open(filename, 'r', encoding='utf8')
         message = file.readline()
         k_array = [int(k) for k in file.readline().split()]
-        private_key = int(file.readline())
         public_key = [int(coord) for coord in file.readline().split()]
 
         for char, k in zip(message, k_array):
             c1 = mul((0, 1), k)
             c2 = add(ALPHABET[char], mul(public_key, k))
-            print('{', c1, ', ', c2, '}', sep='')
-
+            print(f'{c1[0]} {c1[1]}, {c2[0]} {c2[1]}')
+            # print('{', c1, ', ', c2, '}', sep='')
     except FileNotFoundError:
         show_file_err(filename)
 

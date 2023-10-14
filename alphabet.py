@@ -157,3 +157,5 @@ ALPHABET = {' ': (33, 355),
             'э': (256, 630),
             'ю': (257, 293),
             'я': (257, 458)}
+
+INV_ALPHABET = {v: k for k, v in ALPHABET.items()}
