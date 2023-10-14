@@ -36,42 +36,52 @@ def show_help():
         Displays this message.''')
 
 
+def custom_mod(numerator, denominator, modulus):
+    return (numerator * pow(denominator, -1, modulus)) % modulus
+
+
+def add(point1, point2):
+    x1 = point1[0]
+    x2 = point2[0]
+    y1 = point1[1]
+    y2 = point2[1]
+    if x1 == x2 and y1 == y2:
+        _lambda = custom_mod(3 * (x1 ** 2) - 1, 2 * y1, 751)
+    else:
+        _lambda = custom_mod(y2 - y1, x2 - x1, 751)
+    prev_x1 = x1
+    x1 = (_lambda ** 2 - x1 - x2) % 751
+    y1 = (_lambda * (prev_x1 - x1) - y1) % 751
+    return x1, y1
+
+
+def mul(point, k):
+    x2 = x1 = point[0]
+    y2 = y1 = point[1]
+    for i in range(k - 1):
+        x1, y1 = add((x1, y1), (x2, y2))
+    return x1, y1
+
+
 def decode(filename):
     print('decode')
 
 
 def encode(filename):
-    print('encode')
-    '''
-    if decoding_mode:
-        key *= -1
-        new_filename = 'decoded_' + filename
-    else:
-        new_filename = 'encoded_' + filename
-
     try:
-        with open(filename, 'r', encoding='utf8') as file, open(new_filename, 'w', encoding='utf8') as new_file:
-            i = 0
-            for line in file:
-                i += 1
-                new_line = ''
-                for char in line:
-                    if char in EXCEPTIONS:
-                        new_line += char
-                    elif char in ALPHABET:
-                        index = ALPHABET.index(char)
-                        new_line += ALPHABET[(index + key) % LEN]
-                    elif char in ALPHABET_CAPITAL:
-                        index = ALPHABET_CAPITAL.index(char)
-                        new_line += ALPHABET_CAPITAL[(index + key) % LEN]
-                    else:
-                        show_char_warr(char, i, line.index(char) + 1)
-                        new_line += char
-                new_file.write(new_line)
-        print(f'{Color.GREEN}Success! Check file "{new_filename}"{Color.END}')
+        file = open(filename, 'r', encoding='utf8')
+        message = file.readline()
+        k_array = [int(k) for k in file.readline().split()]
+        private_key = int(file.readline())
+        public_key = [int(coord) for coord in file.readline().split()]
+
+        for char, k in zip(message, k_array):
+            c1 = mul((0, 1), k)
+            c2 = add(ALPHABET[char], mul(public_key, k))
+            print('{', c1, ', ', c2, '}', sep='')
+
     except FileNotFoundError:
         show_file_err(filename)
-    '''
 
 
 if __name__ == '__main__':
