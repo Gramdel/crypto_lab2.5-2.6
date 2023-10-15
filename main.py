@@ -74,7 +74,6 @@ def decode(filename):
             c2 = [int(coord) for coord in c[1].split()]
             tmp = mul(c1, private_key)
             x, y = add(c2, (tmp[0], -tmp[1]))
-            print(c)
             print(INV_ALPHABET[(x, y)], end='')
     except FileNotFoundError:
         show_file_err(filename)
@@ -90,8 +89,8 @@ def encode(filename):
         for char, k in zip(message, k_array):
             c1 = mul((0, 1), k)
             c2 = add(ALPHABET[char], mul(public_key, k))
-            print(f'{c1[0]} {c1[1]}, {c2[0]} {c2[1]}')
-            # print('{', c1, ', ', c2, '}', sep='')
+            # print(f'{c1[0]} {c1[1]}, {c2[0]} {c2[1]}')
+            print('{', c1, ', ', c2, '}', sep='')
     except FileNotFoundError:
         show_file_err(filename)
 
